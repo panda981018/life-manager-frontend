@@ -1,16 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // useEffect 추가
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
 
 function LoginPage() {
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true); // true: 로그인, false: 회원가입
+  const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     name: '',
   });
   const [error, setError] = useState('');
+
+  // 탭 전환 시 폼 초기화
+  useEffect(() => {
+    setFormData({
+      email: '',
+      password: '',
+      name: '',
+    });
+    setError('');
+  }, [isLogin]);
 
   const handleChange = (e) => {
     setFormData({

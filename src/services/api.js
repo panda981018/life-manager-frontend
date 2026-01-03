@@ -1,0 +1,51 @@
+import axios from 'axios';
+
+// EC2 서버 주소
+const API_BASE_URL = 'http://52.71.57.93:9000/api';
+
+// axios 인스턴스 생성
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// 요청 인터셉터 (토큰 자동 추가)
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// 인증 API
+export const authAPI = {
+  signup: (data) => api.post('/auth/signup', data),
+  login: (data) => api.post('/auth/login', data),
+};
+
+// 일정 API
+export const scheduleAPI = {
+  getAll: (userId) => api.get('/schedules', { headers: { 'X-User-Id': userId } }),
+  create: (userId, data) => api.post('/schedules', data, { headers: { 'X-User-Id': userId } }),
+  update: (scheduleId, userId, data) => api.put(`/schedules/${scheduleId}`, data, { headers: { 'X-User-Id': userId } }),
+  delete: (scheduleId, userId) => api.delete(`/schedules/${scheduleId}`, { headers: { 'X-User-Id': userId } }),
+};
+
+// 가계부 API
+export const transactionAPI = {
+  getByDateRange: (userId, startDate, endDate) => 
+    api.get(`/transactions?startDate=${startDate}&endDate=${endDate}`, { headers: { 'X-User-Id': userId } }),
+  create: (userId, data) => api.post('/transactions', data, { headers: { 'X-User-Id': userId } }),
+  getSummary: (userId, startDate, endDate) => 
+    api.get(`/transactions/summary?startDate=${startDate}&endDate=${endDate}`, { headers: { 'X-User-Id': userId } }),
+};
+
+export default api;

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // EC2 서버 주소
-const API_BASE_URL = 'http://52.71.57.93:9000/api';
+const API_BASE_URL = 'https://life-manager.duckdns.org/api';
 
 // axios 인스턴스 생성
 const api = axios.create({

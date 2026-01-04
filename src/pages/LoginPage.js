@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { authAPI } from "../services/api";
 import logo from "../assets/logo.svg";
+import Loading from "../components/Loading";
+import Toast from "../components/Toast";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -11,7 +13,8 @@ function LoginPage() {
     password: "",
     name: "",
   });
-  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     setFormData({
@@ -19,7 +22,6 @@ function LoginPage() {
       password: "",
       name: "",
     });
-    setError("");
   }, [isLogin]);
 
   const handleChange = (e) => {
@@ -31,7 +33,7 @@ function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setIsLoading(true);
 
     try {
       let response;
@@ -40,18 +42,36 @@ function LoginPage() {
           email: formData.email,
           password: formData.password,
         });
+
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("userId", response.data.userId);
+        localStorage.setItem("userName", response.data.name);
+
+        setToast({ message: "로그인 성공!", type: "success" });
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1000);
       } else {
         response = await authAPI.signup(formData);
+
+        setToast({
+          message: "회원가입 성공! 로그인해주세요.",
+          type: "success",
+        });
+        setTimeout(() => {
+          setIsLogin(true);
+          setFormData({
+            email: formData.email,
+            password: "",
+            name: "",
+          });
+        }, 1500);
       }
-
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("userId", response.data.userId);
-      localStorage.setItem("userName", response.data.name);
-
-      navigate("/dashboard");
     } catch (err) {
       const errorMessage = err.response?.data?.message || "오류가 발생했습니다";
-      setError(errorMessage);
+      setToast({ message: errorMessage, type: "error" });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -67,6 +87,18 @@ function LoginPage() {
       style={{ minHeight: "100vh" }}
       className="bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4"
     >
+      {/* 로딩 오버레이 */}
+      {isLoading && <Loading />}
+
+      {/* Toast 알림 */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
         <div className="flex justify-center mb-6">
           <img src={logo} alt="Life Manager Logo" className="w-20 h-20" />
@@ -80,18 +112,20 @@ function LoginPage() {
           <button
             type="button"
             onClick={() => setIsLogin(true)}
+            disabled={isLoading}
             className={`flex-1 py-2 text-center ${
               isLogin ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-600"
-            } rounded-l-lg transition`}
+            } rounded-l-lg transition disabled:opacity-50`}
           >
             로그인
           </button>
           <button
             type="button"
             onClick={() => setIsLogin(false)}
+            disabled={isLoading}
             className={`flex-1 py-2 text-center ${
               !isLogin ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-600"
-            } rounded-r-lg transition`}
+            } rounded-r-lg transition disabled:opacity-50`}
           >
             회원가입
           </button>
@@ -109,7 +143,8 @@ function LoginPage() {
                 value={formData.name}
                 onChange={handleChange}
                 onKeyDown={handleKeyDown}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                disabled={isLoading}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base disabled:bg-gray-100"
                 required={!isLogin}
                 autoComplete="name"
               />
@@ -126,7 +161,8 @@ function LoginPage() {
               value={formData.email}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+              disabled={isLoading}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base disabled:bg-gray-100"
               required
               autoComplete="email"
             />
@@ -142,24 +178,20 @@ function LoginPage() {
               value={formData.password}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+              disabled={isLoading}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base disabled:bg-gray-100"
               required
               minLength={8}
               autoComplete={isLogin ? "current-password" : "new-password"}
             />
           </div>
 
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
-
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition font-medium text-base min-h-[48px]"
+            disabled={isLoading}
+            className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition font-medium text-base min-h-[48px] disabled:opacity-50"
           >
-            {isLogin ? "로그인" : "회원가입"}
+            {isLoading ? "처리 중..." : isLogin ? "로그인" : "회원가입"}
           </button>
         </form>
       </div>

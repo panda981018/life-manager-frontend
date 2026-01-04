@@ -146,14 +146,14 @@ function DashboardPage() {
             onClick={() => navigate('/schedules')}
             className="bg-blue-500 text-white p-8 rounded-lg hover:bg-blue-600 transition shadow"
           >
-            <h3 className="text-2xl font-bold mb-2">일정 관리</h3>
+            <h3 className="text-2xl font-bold mb-2">일정 관리 🗓️</h3>
             <p className="text-blue-100">일정을 등록하고 관리하세요</p>
           </button>
           <button
             onClick={() => navigate('/transactions')}
             className="bg-green-500 text-white p-8 rounded-lg hover:bg-green-600 transition shadow"
           >
-            <h3 className="text-2xl font-bold mb-2">가계부 관리</h3>
+            <h3 className="text-2xl font-bold mb-2">가계부 관리 📝</h3>
             <p className="text-green-100">수입과 지출을 기록하세요</p>
           </button>
         </div>

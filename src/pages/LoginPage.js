@@ -75,7 +75,7 @@ function LoginPage() {
           Life Manager
         </h1>
 
-        {/* 탭 전환 */}
+        {/* 탭 전환 (form 밖으로 이동하거나 type="button" 명시) */}
         <div className="flex mb-6">
           <button
             type="button"

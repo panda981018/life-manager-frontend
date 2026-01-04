@@ -20,69 +20,76 @@ function Pagination({ currentPage, totalPages, totalElements, onPageChange }) {
       {/* 좌측: 총 개수 */}
       <div className="text-sm text-gray-600">총 {totalElements}개</div>
 
-      {/* 중앙: 페이지네이션 버튼 - 2페이지 이상일 때만 */}
-      {totalPages > 1 ? (
-        <div className="flex items-center gap-2">
-          {/* 처음으로 */}
-          <button
-            onClick={() => onPageChange(0)}
-            disabled={currentPage === 0}
-            className="px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] text-sm"
-            aria-label="첫 페이지"
-          >
-            «
-          </button>
-
-          {/* 이전 */}
-          <button
-            onClick={() => onPageChange(currentPage - 1)}
-            disabled={currentPage === 0}
-            className="px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] text-sm"
-            aria-label="이전 페이지"
-          >
-            ‹
-          </button>
-
-          {/* 페이지 번호 */}
-          {pages.map((page) => (
+      {/* 중앙: 페이지네이션 */}
+      <div className="flex items-center gap-2">
+        {/* 네비게이션 버튼 - 2페이지 이상일 때만 */}
+        {totalPages > 1 && (
+          <>
+            {/* 처음으로 */}
             <button
-              key={page}
-              onClick={() => onPageChange(page)}
-              className={`px-4 py-2 rounded-lg min-h-[44px] font-medium text-sm ${
-                currentPage === page
-                  ? "bg-blue-500 text-white"
-                  : "border border-gray-300 hover:bg-gray-100"
-              }`}
+              onClick={() => onPageChange(0)}
+              disabled={currentPage === 0}
+              className="px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] text-sm"
+              aria-label="첫 페이지"
             >
-              {page + 1}
+              «
             </button>
-          ))}
 
-          {/* 다음 */}
+            {/* 이전 */}
+            <button
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage === 0}
+              className="px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] text-sm"
+              aria-label="이전 페이지"
+            >
+              ‹
+            </button>
+          </>
+        )}
+
+        {/* 페이지 번호 - 항상 표시 */}
+        {pages.map((page) => (
           <button
-            onClick={() => onPageChange(currentPage + 1)}
-            disabled={currentPage === totalPages - 1}
-            className="px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] text-sm"
-            aria-label="다음 페이지"
+            key={page}
+            onClick={() => onPageChange(page)}
+            disabled={totalPages === 1}
+            className={`px-4 py-2 rounded-lg min-h-[44px] font-medium text-sm ${
+              currentPage === page
+                ? "bg-blue-500 text-white"
+                : "border border-gray-300 hover:bg-gray-100"
+            } ${totalPages === 1 ? "cursor-default" : ""}`}
           >
-            ›
+            {page + 1}
           </button>
+        ))}
 
-          {/* 마지막으로 */}
-          <button
-            onClick={() => onPageChange(totalPages - 1)}
-            disabled={currentPage === totalPages - 1}
-            className="px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] text-sm"
-            aria-label="마지막 페이지"
-          >
-            »
-          </button>
-        </div>
-      ) : (
-        <div></div>
-      )}
+        {/* 네비게이션 버튼 - 2페이지 이상일 때만 */}
+        {totalPages > 1 && (
+          <>
+            {/* 다음 */}
+            <button
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage === totalPages - 1}
+              className="px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] text-sm"
+              aria-label="다음 페이지"
+            >
+              ›
+            </button>
 
-      {/* 우측: 페이지 정보 (항상 표시) */}
+            {/* 마지막으로 */}
+            <button
+              onClick={() => onPageChange(totalPages - 1)}
+              disabled={currentPage === totalPages - 1}
+              className="px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] text-sm"
+              aria-label="마지막 페이지"
+            >
+              »
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* 우측: 페이지 정보 */}
       <div className="text-sm text-gray-600">
         {currentPage + 1} / {totalPages} 페이지
       </div>

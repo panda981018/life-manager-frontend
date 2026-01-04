@@ -70,10 +70,9 @@ function SchedulesPage() {
     setError(null);
 
     try {
-      // sortBy에서 정렬 방향과 필드 분리
       const [field, direction] = sortBy.split("-");
       const sortField = field === "date" ? "startDatetime" : "title";
-      const sortDirection = direction; // 'asc' or 'desc'
+      const sortDirection = direction;
 
       const response = await scheduleAPI.getAll(
         userId,
@@ -84,10 +83,18 @@ function SchedulesPage() {
       );
 
       // Spring Boot Page 응답 구조 처리
-      setSchedules(response.data.content);
-      setFilteredSchedules(response.data.content);
-      setTotalPages(response.data.totalPages);
+      const content = response.data.content;
+      const totalPagesFromServer = response.data.totalPages;
+
+      setSchedules(content);
+      setFilteredSchedules(content);
+      setTotalPages(totalPagesFromServer);
       setTotalElements(response.data.totalElements);
+
+      // 현재 페이지가 전체 페이지를 초과하면 마지막 페이지로 이동
+      if (totalPagesFromServer > 0 && currentPage >= totalPagesFromServer) {
+        setCurrentPage(totalPagesFromServer - 1);
+      }
     } catch (err) {
       console.error("일정 조회 실패:", err);
       setError(

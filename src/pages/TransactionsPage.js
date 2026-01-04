@@ -79,7 +79,6 @@ function TransactionsPage() {
     setError(null);
 
     try {
-      // sortBy에서 정렬 방향과 필드 분리
       const [field, direction] = sortBy.split("-");
       const sortField = field === "date" ? "transactionDate" : "amount";
       const sortDirection = direction;
@@ -101,12 +100,19 @@ function TransactionsPage() {
         ),
       ]);
 
-      // Spring Boot Page 응답 구조 처리
-      setTransactions(transactionsRes.data.content);
-      setFilteredTransactions(transactionsRes.data.content);
-      setTotalPages(transactionsRes.data.totalPages);
+      const content = transactionsRes.data.content;
+      const totalPagesFromServer = transactionsRes.data.totalPages;
+
+      setTransactions(content);
+      setFilteredTransactions(content);
+      setTotalPages(totalPagesFromServer);
       setTotalElements(transactionsRes.data.totalElements);
       setSummary(summaryRes.data);
+
+      // 현재 페이지가 전체 페이지를 초과하면 마지막 페이지로 이동
+      if (totalPagesFromServer > 0 && currentPage >= totalPagesFromServer) {
+        setCurrentPage(totalPagesFromServer - 1);
+      }
     } catch (err) {
       console.error("데이터 로드 실패:", err);
       setError(

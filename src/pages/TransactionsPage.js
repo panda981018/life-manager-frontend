@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { transactionAPI } from '../services/api';
-import Loading from '../components/Loading';
-import ErrorModal from '../components/ErrorModal';
+import Header from '../components/Header';
 
 function TransactionsPage() {
   const navigate = useNavigate();
@@ -139,32 +138,8 @@ function TransactionsPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-        {/* 로딩 모달 */}
-        {isLoading && <Loading />}
-        
-        {/* 에러 모달 */}
-        {error && (
-        <ErrorModal 
-            message={error}
-            onRetry={handleRetry}
-            onClose={handleCloseError}
-        />
-        )}
         {/* 헤더 */}
-        <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-800">Life Manager</h1>
-            <div className="flex items-center gap-4">
-            <span className="text-gray-600">{userName}님</span>
-            <button
-                onClick={() => navigate('/dashboard')}
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition"
-            >
-                대시보드
-            </button>
-            </div>
-        </div>
-        </header>
+        <Header userName={userName} showBackButton={true} />
 
         {/* 메인 콘텐츠 */}
         <main className="max-w-7xl mx-auto px-4 py-8">

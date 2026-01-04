@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'; // useEffect 추가
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
+import logo from '../assets/logo.svg';
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -63,6 +64,11 @@ function LoginPage() {
   return (
     <div style={{ minHeight: '100vh' }} className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4 pb-safe pt-safe">
       <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
+        {/* 로고 추가 */}
+        <div className="flex justify-center mb-6">
+          <img src={logo} alt="Life Manager Logo" className="w-20 h-20" />
+        </div>
+        
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
           Life Manager
         </h1>

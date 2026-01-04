@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { scheduleAPI, transactionAPI } from '../services/api';
 import Loading from '../components/Loading';
 import ErrorModal from '../components/ErrorModal';
+import Header from '../components/Header';
 
 function DashboardPage() {
   const navigate = useNavigate();
@@ -14,12 +15,10 @@ function DashboardPage() {
   const userId = localStorage.getItem('userId');
 
   useEffect(() => {
-    // 로그인 체크
     if (!userId) {
       navigate('/');
       return;
     }
-
     setUserName(localStorage.getItem('userName') || '사용자');
     loadData();
   }, [userId, navigate]);
@@ -29,18 +28,13 @@ function DashboardPage() {
     setError(null);
     
     try {
-      // 일정 조회
       const scheduleRes = await scheduleAPI.getAll(userId);
-      
-      // 현재 시간 기준으로 아직 끝나지 않은 일정만 필터링
       const now = new Date();
       const upcomingSchedules = scheduleRes.data
         .filter(schedule => new Date(schedule.endDatetime) > now)
         .slice(0, 5);
-      
       setSchedules(upcomingSchedules);
 
-      // 이번 달 가계부 요약
       const today = new Date();
       const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
       const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
@@ -59,11 +53,6 @@ function DashboardPage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate('/');
-  };
-
   const handleRetry = () => {
     loadData();
   };
@@ -74,10 +63,8 @@ function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* 로딩 모달 */}
       {isLoading && <Loading />}
       
-      {/* 에러 모달 */}
       {error && (
         <ErrorModal 
           message={error}
@@ -86,23 +73,8 @@ function DashboardPage() {
         />
       )}
 
-      {/* 헤더 */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800">Life Manager</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-gray-600">{userName}님</span>
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
-            >
-              로그아웃
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header userName={userName} />
 
-      {/* 메인 콘텐츠 */}
       <main className="max-w-7xl mx-auto px-4 py-8">
         <h2 className="text-3xl font-bold text-gray-800 mb-8">대시보드</h2>
 
@@ -131,7 +103,7 @@ function DashboardPage() {
         {/* 최근 일정 */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-bold text-gray-800">예정된 일정</h3>
+            <h3 className="text-xl font-bold text-gray-800">다가오는 일정</h3>
             <button
               onClick={() => navigate('/schedules')}
               className="text-blue-500 hover:text-blue-600"

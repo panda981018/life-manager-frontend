@@ -1,17 +1,17 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.svg';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import logo from "../assets/logo.svg";
 
 function Header({ userName, showBackButton = false }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate('/');
+    navigate("/");
   };
 
   const handleBack = () => {
-    navigate('/dashboard');
+    navigate("/dashboard");
   };
 
   return (

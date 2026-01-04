@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 
-function Toast({ message, type = 'success', onClose, duration = 3000 }) {
+function Toast({ message, type = "success", onClose, duration = 3000 }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
@@ -10,22 +10,24 @@ function Toast({ message, type = 'success', onClose, duration = 3000 }) {
   }, [duration, onClose]);
 
   const styles = {
-    success: 'bg-green-500',
-    error: 'bg-red-500',
-    info: 'bg-blue-500',
-    warning: 'bg-yellow-500',
+    success: "bg-green-500",
+    error: "bg-red-500",
+    info: "bg-blue-500",
+    warning: "bg-yellow-500",
   };
 
   const icons = {
-    success: '✓',
-    error: '✕',
-    info: 'ℹ',
-    warning: '⚠',
+    success: "✓",
+    error: "✕",
+    info: "ℹ",
+    warning: "⚠",
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50 animate-slide-in">
-      <div className={`${styles[type]} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px]`}>
+    <div className="fixed top-4 right-4 z-[9999] animate-slide-in">
+      <div
+        className={`${styles[type]} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px]`}
+      >
         <span className="text-2xl">{icons[type]}</span>
         <p className="flex-1 font-medium">{message}</p>
         <button

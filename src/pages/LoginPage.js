@@ -13,7 +13,6 @@ function LoginPage() {
   });
   const [error, setError] = useState("");
 
-  // 탭 전환 시 폼 초기화
   useEffect(() => {
     setFormData({
       email: "",
@@ -37,26 +36,29 @@ function LoginPage() {
     try {
       let response;
       if (isLogin) {
-        // 로그인
         response = await authAPI.login({
           email: formData.email,
           password: formData.password,
         });
       } else {
-        // 회원가입
         response = await authAPI.signup(formData);
       }
 
-      // 토큰 및 사용자 정보 저장
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("userId", response.data.userId);
       localStorage.setItem("userName", response.data.name);
 
-      // 대시보드로 이동
       navigate("/dashboard");
     } catch (err) {
       const errorMessage = err.response?.data?.message || "오류가 발생했습니다";
       setError(errorMessage);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSubmit(e);
     }
   };
 
@@ -66,7 +68,6 @@ function LoginPage() {
       className="bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4"
     >
       <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
-        {/* 로고 */}
         <div className="flex justify-center mb-6">
           <img src={logo} alt="Life Manager Logo" className="w-20 h-20" />
         </div>
@@ -75,7 +76,6 @@ function LoginPage() {
           Life Manager
         </h1>
 
-        {/* 탭 전환 (form 밖으로 이동하거나 type="button" 명시) */}
         <div className="flex mb-6">
           <button
             type="button"
@@ -97,7 +97,6 @@ function LoginPage() {
           </button>
         </div>
 
-        {/* 로그인/회원가입 폼 */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
             <div>
@@ -109,6 +108,7 @@ function LoginPage() {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
+                onKeyDown={handleKeyDown}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
                 required={!isLogin}
                 autoComplete="name"
@@ -125,6 +125,7 @@ function LoginPage() {
               name="email"
               value={formData.email}
               onChange={handleChange}
+              onKeyDown={handleKeyDown}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
               required
               autoComplete="email"
@@ -140,6 +141,7 @@ function LoginPage() {
               name="password"
               value={formData.password}
               onChange={handleChange}
+              onKeyDown={handleKeyDown}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
               required
               minLength={8}

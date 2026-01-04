@@ -139,6 +139,9 @@ function TransactionsPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
+        {/* 로딩 모달 */}
+        {isLoading && <Loading />}
+        
         {/* 에러 모달 */}
         {error && (
         <ErrorModal 

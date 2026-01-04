@@ -63,11 +63,6 @@ function SchedulesPage() {
     setError(null);
   };
 
-  // 로딩 중
-  if (isLoading) {
-    return <Loading />;
-  }
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -141,6 +136,9 @@ function SchedulesPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
+        {/* 로딩 모달 */}
+        {isLoading && <Loading />}
+        
         {/* 에러 모달 */}
         {error && (
         <ErrorModal 

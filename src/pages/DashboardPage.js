@@ -102,25 +102,33 @@ function DashboardPage() {
               전체 보기 →
             </button>
           </div>
-          {schedules.map((schedule) => (
-            <div
-              key={schedule.id}
-              className="border-l-4 pl-4 py-2"
-              style={{ borderLeftColor: schedule.color || '#3B82F6' }}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <h4 className="font-medium text-gray-800">{schedule.title}</h4>
-                {schedule.category && (
-                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                    {schedule.category}
-                  </span>
-                )}
-              </div>
-              <p className="text-sm text-gray-500">
-                {new Date(schedule.startDatetime).toLocaleString('ko-KR')}
-              </p>
+          {schedules.length > 0 ? (
+            <div className="space-y-3">
+              {schedules.map((schedule) => (
+                <div
+                  key={schedule.id}
+                  className="border-l-4 pl-4 py-2"
+                  style={{ borderLeftColor: schedule.color || '#3B82F6' }}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-medium text-gray-800">{schedule.title}</h4>
+                    {schedule.category && (
+                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                        {schedule.category}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    {new Date(schedule.startDatetime).toLocaleString('ko-KR')}
+                  </p>
+                </div>
+              ))}
             </div>
-          ))}
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              등록된 일정이 없습니다
+            </div>
+          )}
         </div>
 
         {/* 메뉴 */}

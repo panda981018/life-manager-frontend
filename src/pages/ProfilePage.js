@@ -39,6 +39,17 @@ function ProfilePage() {
     }
   };
 
+  const handleNameChange = (e) => {
+    setNameForm({ name: e.target.value });
+  };
+
+  const handlePasswordChange = (e) => {
+    setPasswordForm({
+      ...passwordForm,
+      [e.target.name]: e.target.value,
+    });
+  };
+
   const handleNameSubmit = async (e) => {
     e.preventDefault();
 

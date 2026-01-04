@@ -14,10 +14,17 @@ function Header({ userName, showBackButton = false }) {
     navigate("/dashboard");
   };
 
+  const handleLogoClick = () => {
+    navigate("/dashboard");
+  };
+
   return (
     <header className="bg-white shadow">
       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
+        <div
+          className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition"
+          onClick={handleLogoClick}
+        >
           <img src={logo} alt="Life Manager Logo" className="w-10 h-10" />
           <h1 className="text-2xl font-bold text-gray-800">Life Manager</h1>
         </div>

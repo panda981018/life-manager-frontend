@@ -102,9 +102,18 @@ export const transactionAPI = {
 
 // 사용자 API
 export const userAPI = {
-  getUser: () => api.get("/users/me"),
-  updateUser: (data) => api.put("/users/me", data),
-  changePassword: (data) => api.put("/users/me/password", data),
+  getUser: (userId) =>
+    api.get(`/users/me`, {
+      headers: { "X-User-Id": userId },
+    }),
+  updateUser: (userId, data) =>
+    api.put(`/users/me`, data, {
+      headers: { "X-User-Id": userId },
+    }),
+  changePassword: (userId, data) =>
+    api.put(`/users/me/password`, data, {
+      headers: { "X-User-Id": userId },
+    }),
 };
 
 export default api;

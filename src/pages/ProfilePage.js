@@ -23,12 +23,12 @@ function ProfilePage() {
   useEffect(() => {
     if (!checkAuth()) return;
     loadUserInfo();
-  }, []);
+  }, [userInfo, nameForm, passwordForm]);
 
   const loadUserInfo = async () => {
     setIsLoading(true);
     try {
-      const response = await userAPI.getUser(); // userId 제거
+      const response = await userAPI.getUser(userId); // userId 제거
       setUserInfo(response.data);
       setNameForm({ name: response.data.name });
     } catch (err) {
@@ -60,7 +60,7 @@ function ProfilePage() {
 
     setIsLoading(true);
     try {
-      await userAPI.updateUser({ name: nameForm.name }); // userId 제거
+      await userAPI.updateUser(userId, { name: nameForm.name }); // userId 제거
 
       localStorage.setItem("userName", nameForm.name);
 
@@ -100,8 +100,7 @@ function ProfilePage() {
 
     setIsLoading(true);
     try {
-      await userAPI.changePassword({
-        // userId 제거
+      await userAPI.changePassword(userId, {
         currentPassword: passwordForm.currentPassword,
         newPassword: passwordForm.newPassword,
       });

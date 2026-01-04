@@ -1,27 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { scheduleAPI, transactionAPI } from "../services/api";
+import { useAuth } from "../hooks";
 import Loading from "../components/Loading";
 import ErrorModal from "../components/ErrorModal";
 import Header from "../components/Header";
 
 function DashboardPage() {
-  const navigate = useNavigate();
-  const [userName, setUserName] = useState("");
+  const { userId, checkAuth } = useAuth();
   const [schedules, setSchedules] = useState([]);
   const [summary, setSummary] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const userId = localStorage.getItem("userId");
 
   useEffect(() => {
-    if (!userId) {
-      navigate("/");
-      return;
-    }
-    setUserName(localStorage.getItem("userName") || "사용자");
+    if (!checkAuth()) return;
     loadData();
-  }, [userId, navigate]);
+  }, []);
 
   const loadData = async () => {
     setIsLoading(true);

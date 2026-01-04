@@ -1,35 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { authAPI } from "../services/api";
+import { useAuth, useForm } from "../hooks";
 import logo from "../assets/logo.svg";
 import Loading from "../components/Loading";
 import Toast from "../components/Toast";
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
+  const [isLoading, setIsLoading] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const {
+    values: formData,
+    handleChange,
+    resetForm,
+    setValues,
+  } = useForm({
     email: "",
     password: "",
     name: "",
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [toast, setToast] = useState(null);
 
   useEffect(() => {
-    setFormData({
-      email: "",
-      password: "",
-      name: "",
-    });
+    resetForm();
   }, [isLogin]);
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,9 +40,7 @@ function LoginPage() {
           password: formData.password,
         });
 
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("userId", response.data.userId);
-        localStorage.setItem("userName", response.data.name);
+        login(response.data.token, response.data.userId, response.data.name);
 
         setToast({ message: "로그인 성공!", type: "success" });
         setTimeout(() => {
@@ -60,7 +55,7 @@ function LoginPage() {
         });
         setTimeout(() => {
           setIsLogin(true);
-          setFormData({
+          setValues({
             email: formData.email,
             password: "",
             name: "",

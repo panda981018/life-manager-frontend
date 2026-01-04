@@ -269,7 +269,7 @@ function TransactionsPage() {
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold text-gray-800">가계부 관리 📝</h2>
+          <h2 className="text-3xl font-bold text-gray-800">가계부 관리 💰</h2>
           <button
             onClick={openNewTransactionModal}
             className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition text-base font-medium"

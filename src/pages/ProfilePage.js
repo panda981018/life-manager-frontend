@@ -23,7 +23,7 @@ function ProfilePage() {
   useEffect(() => {
     if (!checkAuth()) return;
     loadUserInfo();
-  }, [userInfo, nameForm, passwordForm]);
+  }, [userInfo]);
 
   const loadUserInfo = async () => {
     setIsLoading(true);

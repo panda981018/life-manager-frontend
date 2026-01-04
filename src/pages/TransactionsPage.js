@@ -430,11 +430,13 @@ function TransactionsPage() {
                 {filteredTransactions.map((transaction) => (
                   <div
                     key={transaction.id}
-                    className="p-6 hover:bg-gray-50 transition"
+                    className="p-4 md:p-6 hover:bg-gray-50 transition"
                   >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
+                    {/* 모바일: 세로 레이아웃, 데스크톱: 가로 레이아웃 */}
+                    <div className="flex flex-col gap-3">
+                      {/* 상단: 타입 + 카테고리 + 금액 */}
+                      <div className="flex justify-between items-start gap-3">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span
                             className={`px-3 py-1 rounded text-sm font-medium ${
                               transaction.type === "INCOME"
@@ -445,23 +447,15 @@ function TransactionsPage() {
                             {transaction.type === "INCOME" ? "수입" : "지출"}
                           </span>
                           {transaction.category && (
-                            <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                            <span className="text-xs md:text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
                               {transaction.category}
                             </span>
                           )}
                         </div>
-                        {transaction.description && (
-                          <p className="text-gray-600 mb-2">
-                            {transaction.description}
-                          </p>
-                        )}
-                        <div className="text-sm text-gray-500">
-                          {transaction.transactionDate}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
+
+                        {/* 금액 */}
                         <span
-                          className={`text-2xl font-bold ${
+                          className={`text-xl md:text-2xl font-bold whitespace-nowrap ${
                             transaction.type === "INCOME"
                               ? "text-green-600"
                               : "text-red-600"
@@ -470,16 +464,32 @@ function TransactionsPage() {
                           {transaction.type === "INCOME" ? "+" : "-"}
                           {transaction.amount.toLocaleString()}원
                         </span>
+                      </div>
+
+                      {/* 설명 */}
+                      {transaction.description && (
+                        <p className="text-sm md:text-base text-gray-600 break-words">
+                          {transaction.description}
+                        </p>
+                      )}
+
+                      {/* 날짜 + 버튼 */}
+                      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+                        <div className="text-xs md:text-sm text-gray-500">
+                          {transaction.transactionDate}
+                        </div>
+
+                        {/* 버튼 그룹 */}
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleEdit(transaction)}
-                            className="text-blue-600 hover:text-blue-800 px-4 py-2 min-h-[44px]"
+                            className="flex-1 md:flex-none text-blue-600 hover:text-blue-800 px-4 py-2 min-h-[44px] border border-blue-600 rounded md:border-0"
                           >
                             수정
                           </button>
                           <button
                             onClick={() => handleDelete(transaction.id)}
-                            className="text-red-600 hover:text-red-800 px-4 py-2 min-h-[44px]"
+                            className="flex-1 md:flex-none text-red-600 hover:text-red-800 px-4 py-2 min-h-[44px] border border-red-600 rounded md:border-0"
                           >
                             삭제
                           </button>

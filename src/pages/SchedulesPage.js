@@ -333,49 +333,67 @@ function SchedulesPage() {
                 {filteredSchedules.map((schedule) => (
                   <div
                     key={schedule.id}
-                    className="p-6 hover:bg-gray-50 transition"
+                    className="p-4 md:p-6 hover:bg-gray-50 transition"
                   >
-                    <div className="flex justify-between items-start">
+                    {/* 모바일: 세로 레이아웃, 데스크톱: 가로 레이아웃 */}
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-3">
+                      {/* 일정 정보 */}
                       <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
+                        {/* 제목 + 색상 */}
+                        <div className="flex items-center gap-2 mb-2">
                           <div
-                            className="w-4 h-4 rounded"
+                            className="w-3 h-3 md:w-4 md:h-4 rounded flex-shrink-0"
                             style={{ backgroundColor: schedule.color }}
                           ></div>
-                          <h3 className="text-xl font-bold text-gray-800">
+                          <h3 className="text-lg md:text-xl font-bold text-gray-800 break-words">
                             {schedule.title}
                           </h3>
-                          {schedule.category && (
-                            <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        </div>
+
+                        {/* 카테고리 */}
+                        {schedule.category && (
+                          <div className="mb-2">
+                            <span className="inline-block text-xs md:text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
                               {schedule.category}
                             </span>
-                          )}
-                        </div>
+                          </div>
+                        )}
+
+                        {/* 설명 */}
                         {schedule.description && (
-                          <p className="text-gray-600 mb-2">
+                          <p className="text-sm md:text-base text-gray-600 mb-2 break-words">
                             {schedule.description}
                           </p>
                         )}
-                        <div className="text-sm text-gray-500">
-                          {new Date(schedule.startDatetime).toLocaleString(
-                            "ko-KR"
-                          )}
-                          {" ~ "}
-                          {new Date(schedule.endDatetime).toLocaleString(
-                            "ko-KR"
-                          )}
+
+                        {/* 날짜 시간 */}
+                        <div className="text-xs md:text-sm text-gray-500 space-y-1">
+                          <div>
+                            시작:{" "}
+                            {new Date(schedule.startDatetime).toLocaleString(
+                              "ko-KR"
+                            )}
+                          </div>
+                          <div>
+                            종료:{" "}
+                            {new Date(schedule.endDatetime).toLocaleString(
+                              "ko-KR"
+                            )}
+                          </div>
                         </div>
                       </div>
-                      <div className="flex gap-2">
+
+                      {/* 버튼 그룹 */}
+                      <div className="flex md:flex-col gap-2 justify-end">
                         <button
                           onClick={() => handleEdit(schedule)}
-                          className="text-blue-600 hover:text-blue-800 px-4 py-2 min-h-[44px]"
+                          className="flex-1 md:flex-none text-blue-600 hover:text-blue-800 px-4 py-2 min-h-[44px] border border-blue-600 rounded md:border-0"
                         >
                           수정
                         </button>
                         <button
                           onClick={() => handleDelete(schedule.id)}
-                          className="text-red-600 hover:text-red-800 px-4 py-2 min-h-[44px]"
+                          className="flex-1 md:flex-none text-red-600 hover:text-red-800 px-4 py-2 min-h-[44px] border border-red-600 rounded md:border-0"
                         >
                           삭제
                         </button>
@@ -385,7 +403,6 @@ function SchedulesPage() {
                 ))}
               </div>
 
-              {/* 페이지네이션 */}
               {!searchKeyword && (
                 <Pagination
                   currentPage={currentPage}

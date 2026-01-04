@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { scheduleAPI, transactionAPI } from '../services/api';
+import Loading from '../components/Loading';
+import ErrorModal from '../components/ErrorModal';
 
 function DashboardPage() {
   const navigate = useNavigate();
   const [userName, setUserName] = useState('');
   const [schedules, setSchedules] = useState([]);
   const [summary, setSummary] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const userId = localStorage.getItem('userId');
 
   useEffect(() => {
@@ -21,10 +25,20 @@ function DashboardPage() {
   }, [userId, navigate]);
 
   const loadData = async () => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
       // 일정 조회
       const scheduleRes = await scheduleAPI.getAll(userId);
-      setSchedules(scheduleRes.data.slice(0, 5)); // 최근 5개만
+      
+      // 현재 시간 기준으로 아직 끝나지 않은 일정만 필터링
+      const now = new Date();
+      const upcomingSchedules = scheduleRes.data
+        .filter(schedule => new Date(schedule.endDatetime) > now)
+        .slice(0, 5);
+      
+      setSchedules(upcomingSchedules);
 
       // 이번 달 가계부 요약
       const today = new Date();
@@ -39,6 +53,9 @@ function DashboardPage() {
       setSummary(summaryRes.data);
     } catch (err) {
       console.error('데이터 로드 실패:', err);
+      setError(err.response?.data?.message || '데이터를 불러오는 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -47,8 +64,30 @@ function DashboardPage() {
     navigate('/');
   };
 
+  const handleRetry = () => {
+    loadData();
+  };
+
+  const handleCloseError = () => {
+    setError(null);
+  };
+
+  // 로딩 중
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
+      {/* 에러 모달 */}
+      {error && (
+        <ErrorModal 
+          message={error}
+          onRetry={handleRetry}
+          onClose={handleCloseError}
+        />
+      )}
+
       {/* 헤더 */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
@@ -94,7 +133,7 @@ function DashboardPage() {
         {/* 최근 일정 */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-bold text-gray-800">최근 일정</h3>
+            <h3 className="text-xl font-bold text-gray-800">예정된 일정</h3>
             <button
               onClick={() => navigate('/schedules')}
               className="text-blue-500 hover:text-blue-600"

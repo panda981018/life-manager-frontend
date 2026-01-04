@@ -4,6 +4,7 @@ import { scheduleAPI } from '../services/api';
 import Header from '../components/Header';
 import Loading from '../components/Loading';
 import ErrorModal from '../components/ErrorModal';
+import Toast from '../components/Toast';
 
 function SchedulesPage() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ function SchedulesPage() {
   const [schedules, setSchedules] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null); // Toast 상태 추가
   const [showModal, setShowModal] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState(null);
   const [formData, setFormData] = useState({
@@ -58,13 +60,22 @@ function SchedulesPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // 날짜 검증 추가
+    if (new Date(formData.startDatetime) > new Date(formData.endDatetime)) {
+      setToast({ message: '종료 시간은 시작 시간보다 늦어야 합니다', type: 'warning' });
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
       if (editingSchedule) {
         await scheduleAPI.update(editingSchedule.id, userId, formData);
+        setToast({ message: '일정이 수정되었습니다', type: 'success' });
       } else {
         await scheduleAPI.create(userId, formData);
+        setToast({ message: '일정이 추가되었습니다', type: 'success' });
       }
       
       setFormData({
@@ -107,6 +118,7 @@ function SchedulesPage() {
     setIsLoading(true);
     try {
       await scheduleAPI.delete(scheduleId, userId);
+      setToast({ message: '일정이 삭제되었습니다', type: 'success' });
       await loadSchedules();
     } catch (err) {
       console.error('일정 삭제 실패:', err);
@@ -140,6 +152,15 @@ function SchedulesPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {/* Toast 알림 */}
+      {toast && (
+        <Toast 
+          message={toast.message} 
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       {/* 로딩 모달 */}
       {isLoading && <Loading />}
       
@@ -159,7 +180,7 @@ function SchedulesPage() {
           <h2 className="text-3xl font-bold text-gray-800">일정 관리</h2>
           <button
             onClick={openNewScheduleModal}
-            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition"
+            className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition text-base font-medium"
           >
             + 일정 추가
           </button>
@@ -199,13 +220,13 @@ function SchedulesPage() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEdit(schedule)}
-                        className="text-blue-600 hover:text-blue-800 px-3 py-1"
+                        className="text-blue-600 hover:text-blue-800 px-4 py-2 min-h-[44px]"
                       >
                         수정
                       </button>
                       <button
                         onClick={() => handleDelete(schedule.id)}
-                        className="text-red-600 hover:text-red-800 px-3 py-1"
+                        className="text-red-600 hover:text-red-800 px-4 py-2 min-h-[44px]"
                       >
                         삭제
                       </button>
@@ -224,8 +245,8 @@ function SchedulesPage() {
 
       {/* 모달 */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 w-full max-w-md">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-8 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-2xl font-bold mb-6">
               {editingSchedule ? '일정 수정' : '일정 추가'}
             </h3>
@@ -240,7 +261,7 @@ function SchedulesPage() {
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
                   required
                 />
               </div>
@@ -254,7 +275,7 @@ function SchedulesPage() {
                   value={formData.description}
                   onChange={handleChange}
                   rows="3"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
                 />
               </div>
 
@@ -267,7 +288,7 @@ function SchedulesPage() {
                   name="startDatetime"
                   value={formData.startDatetime}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
                   required
                 />
               </div>
@@ -281,7 +302,7 @@ function SchedulesPage() {
                   name="endDatetime"
                   value={formData.endDatetime}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
                   required
                 />
               </div>
@@ -296,7 +317,7 @@ function SchedulesPage() {
                   value={formData.category}
                   onChange={handleChange}
                   placeholder="예: 회의, 개인, 업무"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
                 />
               </div>
 
@@ -309,19 +330,19 @@ function SchedulesPage() {
                   name="color"
                   value={formData.color}
                   onChange={handleChange}
-                  className="w-full h-10 border border-gray-300 rounded-lg"
+                  className="w-full h-12 border border-gray-300 rounded-lg"
                 />
               </div>
 
-              <div className="flex items-center">
+              <div className="flex items-center min-h-[44px]">
                 <input
                   type="checkbox"
                   name="isAllDay"
                   checked={formData.isAllDay}
                   onChange={handleChange}
-                  className="w-4 h-4 text-blue-600"
+                  className="w-5 h-5 text-blue-600"
                 />
-                <label className="ml-2 text-sm text-gray-700">
+                <label className="ml-3 text-base text-gray-700">
                   종일
                 </label>
               </div>
@@ -333,13 +354,13 @@ function SchedulesPage() {
                     setShowModal(false);
                     setEditingSchedule(null);
                   }}
-                  className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition"
+                  className="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400 transition font-medium text-base min-h-[48px]"
                 >
                   취소
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
+                  className="flex-1 bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition font-medium text-base min-h-[48px]"
                 >
                   {editingSchedule ? '수정' : '등록'}
                 </button>

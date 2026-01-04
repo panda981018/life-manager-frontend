@@ -4,6 +4,7 @@ import { transactionAPI } from '../services/api';
 import Header from '../components/Header';
 import Loading from '../components/Loading';
 import ErrorModal from '../components/ErrorModal';
+import Toast from '../components/Toast';
 
 function TransactionsPage() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ function TransactionsPage() {
   const [summary, setSummary] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null); // Toast 상태 추가
   const [showModal, setShowModal] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [dateRange, setDateRange] = useState({
@@ -64,20 +66,38 @@ function TransactionsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // 금액 검증
+    const amount = parseFloat(formData.amount);
+    if (amount <= 0) {
+      setToast({ message: '금액은 0보다 커야 합니다', type: 'warning' });
+      return;
+    }
+    
+    // 미래 날짜 경고 (선택사항)
+    const today = new Date().toISOString().split('T')[0];
+    if (formData.transactionDate > today) {
+      if (!window.confirm('미래 날짜로 입력하시겠습니까?')) {
+        return;
+      }
+    }
+    
     setIsLoading(true);
     
     try {
       const submitData = {
         ...formData,
-        amount: parseFloat(formData.amount),
+        amount: amount,
       };
 
       if (editingTransaction) {
-        // 수정 API가 없으므로 삭제 후 재등록
         await transactionAPI.delete(editingTransaction.id, userId);
+        await transactionAPI.create(userId, submitData);
+        setToast({ message: '거래가 수정되었습니다', type: 'success' });
+      } else {
+        await transactionAPI.create(userId, submitData);
+        setToast({ message: '거래가 추가되었습니다', type: 'success' });
       }
-      
-      await transactionAPI.create(userId, submitData);
       
       setFormData({
         type: 'EXPENSE',
@@ -115,6 +135,7 @@ function TransactionsPage() {
     setIsLoading(true);
     try {
       await transactionAPI.delete(transactionId, userId);
+      setToast({ message: '거래가 삭제되었습니다', type: 'success' });
       await loadData();
     } catch (err) {
       console.error('거래 삭제 실패:', err);
@@ -146,6 +167,15 @@ function TransactionsPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {/* Toast 알림 */}
+      {toast && (
+        <Toast 
+          message={toast.message} 
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       {/* 로딩 모달 */}
       {isLoading && <Loading />}
       
@@ -165,7 +195,7 @@ function TransactionsPage() {
           <h2 className="text-3xl font-bold text-gray-800">가계부 관리</h2>
           <button
             onClick={openNewTransactionModal}
-            className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition"
+            className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition text-base font-medium"
           >
             + 거래 추가
           </button>
@@ -182,7 +212,7 @@ function TransactionsPage() {
                 type="date"
                 value={dateRange.startDate}
                 onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
               />
             </div>
             <div className="flex-1">
@@ -193,7 +223,7 @@ function TransactionsPage() {
                 type="date"
                 value={dateRange.endDate}
                 onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
               />
             </div>
           </div>
@@ -264,13 +294,13 @@ function TransactionsPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(transaction)}
-                          className="text-blue-600 hover:text-blue-800 px-3 py-1"
+                          className="text-blue-600 hover:text-blue-800 px-4 py-2 min-h-[44px]"
                         >
                           수정
                         </button>
                         <button
                           onClick={() => handleDelete(transaction.id)}
-                          className="text-red-600 hover:text-red-800 px-3 py-1"
+                          className="text-red-600 hover:text-red-800 px-4 py-2 min-h-[44px]"
                         >
                           삭제
                         </button>
@@ -290,8 +320,8 @@ function TransactionsPage() {
 
       {/* 모달 */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 w-full max-w-md">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-8 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-2xl font-bold mb-6">
               {editingTransaction ? '거래 수정' : '거래 추가'}
             </h3>
@@ -305,7 +335,7 @@ function TransactionsPage() {
                   name="type"
                   value={formData.type}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base"
                   required
                 >
                   <option value="INCOME">수입</option>
@@ -322,9 +352,10 @@ function TransactionsPage() {
                   name="amount"
                   value={formData.amount}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base"
                   required
-                  min="0"
+                  min="1"
+                  step="1"
                 />
               </div>
 
@@ -338,7 +369,7 @@ function TransactionsPage() {
                   value={formData.category}
                   onChange={handleChange}
                   placeholder="예: 식비, 교통비, 월급"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base"
                 />
               </div>
 
@@ -351,7 +382,7 @@ function TransactionsPage() {
                   value={formData.description}
                   onChange={handleChange}
                   rows="3"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base"
                 />
               </div>
 
@@ -364,7 +395,7 @@ function TransactionsPage() {
                   name="transactionDate"
                   value={formData.transactionDate}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base"
                   required
                 />
               </div>
@@ -376,13 +407,13 @@ function TransactionsPage() {
                     setShowModal(false);
                     setEditingTransaction(null);
                   }}
-                  className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition"
+                  className="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400 transition font-medium text-base min-h-[48px]"
                 >
                   취소
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition"
+                  className="flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition font-medium text-base min-h-[48px]"
                 >
                   {editingTransaction ? '수정' : '등록'}
                 </button>

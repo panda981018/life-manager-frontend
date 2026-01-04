@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* iOS Safe Area 대응 */
 body {
   margin: 0;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
@@ -12,4 +13,20 @@ body {
 
 #root {
   min-height: 100vh;
+}
+
+/* Toast 애니메이션 */
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
 }

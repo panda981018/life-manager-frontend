@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import Loading from "../components/Loading";
 import ErrorModal from "../components/ErrorModal";
 import Toast from "../components/Toast";
+import Pagination from "../components/Pagination";
 
 function TransactionsPage() {
   const navigate = useNavigate();
@@ -15,7 +16,11 @@ function TransactionsPage() {
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [sortBy, setSortBy] = useState("date-desc");
-  const [filterType, setFilterType] = useState("all"); // all, INCOME, EXPENSE
+  const [filterType, setFilterType] = useState("all");
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [pageSize] = useState(10);
   const [summary, setSummary] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -42,18 +47,16 @@ function TransactionsPage() {
       return;
     }
     loadData();
-  }, [userId, navigate, dateRange]);
+  }, [userId, navigate, dateRange, currentPage, sortBy]);
 
-  // 검색, 필터, 정렬 적용
+  // 클라이언트 사이드 검색 및 타입 필터링
   useEffect(() => {
     let result = [...transactions];
 
-    // 타입 필터링
     if (filterType !== "all") {
       result = result.filter((transaction) => transaction.type === filterType);
     }
 
-    // 검색 필터링
     if (searchKeyword.trim()) {
       result = result.filter(
         (transaction) =>
@@ -68,41 +71,28 @@ function TransactionsPage() {
       );
     }
 
-    // 정렬
-    switch (sortBy) {
-      case "date-asc":
-        result.sort(
-          (a, b) => new Date(a.transactionDate) - new Date(b.transactionDate)
-        );
-        break;
-      case "date-desc":
-        result.sort(
-          (a, b) => new Date(b.transactionDate) - new Date(a.transactionDate)
-        );
-        break;
-      case "amount-asc":
-        result.sort((a, b) => a.amount - b.amount);
-        break;
-      case "amount-desc":
-        result.sort((a, b) => b.amount - a.amount);
-        break;
-      default:
-        break;
-    }
-
     setFilteredTransactions(result);
-  }, [transactions, searchKeyword, sortBy, filterType]);
+  }, [transactions, searchKeyword, filterType]);
 
   const loadData = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
+      // sortBy에서 정렬 방향과 필드 분리
+      const [field, direction] = sortBy.split("-");
+      const sortField = field === "date" ? "transactionDate" : "amount";
+      const sortDirection = direction;
+
       const [transactionsRes, summaryRes] = await Promise.all([
         transactionAPI.getByDateRange(
           userId,
           dateRange.startDate,
-          dateRange.endDate
+          dateRange.endDate,
+          currentPage,
+          pageSize,
+          sortField,
+          sortDirection
         ),
         transactionAPI.getSummary(
           userId,
@@ -110,8 +100,12 @@ function TransactionsPage() {
           dateRange.endDate
         ),
       ]);
-      setTransactions(transactionsRes.data);
-      setFilteredTransactions(transactionsRes.data);
+
+      // Spring Boot Page 응답 구조 처리
+      setTransactions(transactionsRes.data.content);
+      setFilteredTransactions(transactionsRes.data.content);
+      setTotalPages(transactionsRes.data.totalPages);
+      setTotalElements(transactionsRes.data.totalElements);
       setSummary(summaryRes.data);
     } catch (err) {
       console.error("데이터 로드 실패:", err);
@@ -124,12 +118,17 @@ function TransactionsPage() {
     }
   };
 
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
   const handleSearch = (e) => {
     setSearchKeyword(e.target.value);
   };
 
   const handleSortChange = (e) => {
     setSortBy(e.target.value);
+    setCurrentPage(0);
   };
 
   const handleFilterTypeChange = (type) => {
@@ -146,14 +145,12 @@ function TransactionsPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 금액 검증
     const amount = parseFloat(formData.amount);
     if (amount <= 0) {
       setToast({ message: "금액은 0보다 커야 합니다", type: "warning" });
       return;
     }
 
-    // 미래 날짜 경고
     const today = new Date().toISOString().split("T")[0];
     if (formData.transactionDate > today) {
       if (!window.confirm("미래 날짜로 입력하시겠습니까?")) {
@@ -187,6 +184,7 @@ function TransactionsPage() {
       });
       setShowModal(false);
       setEditingTransaction(null);
+      setCurrentPage(0);
       await loadData();
     } catch (err) {
       console.error("거래 저장 실패:", err);
@@ -246,7 +244,6 @@ function TransactionsPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Toast 알림 */}
       {toast && (
         <Toast
           message={toast.message}
@@ -255,10 +252,8 @@ function TransactionsPage() {
         />
       )}
 
-      {/* 로딩 모달 */}
       {isLoading && <Loading />}
 
-      {/* 에러 모달 */}
       {error && (
         <ErrorModal
           message={error}
@@ -290,9 +285,10 @@ function TransactionsPage() {
               <input
                 type="date"
                 value={dateRange.startDate}
-                onChange={(e) =>
-                  setDateRange({ ...dateRange, startDate: e.target.value })
-                }
+                onChange={(e) => {
+                  setDateRange({ ...dateRange, startDate: e.target.value });
+                  setCurrentPage(0);
+                }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
               />
             </div>
@@ -303,9 +299,10 @@ function TransactionsPage() {
               <input
                 type="date"
                 value={dateRange.endDate}
-                onChange={(e) =>
-                  setDateRange({ ...dateRange, endDate: e.target.value })
-                }
+                onChange={(e) => {
+                  setDateRange({ ...dateRange, endDate: e.target.value });
+                  setCurrentPage(0);
+                }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
               />
             </div>
@@ -336,7 +333,6 @@ function TransactionsPage() {
 
         {/* 검색 & 정렬 & 필터 섹션 */}
         <div className="bg-white rounded-lg shadow p-4 mb-6">
-          {/* 타입 필터 버튼 */}
           <div className="flex gap-2 mb-4">
             <button
               onClick={() => handleFilterTypeChange("all")}
@@ -371,7 +367,6 @@ function TransactionsPage() {
           </div>
 
           <div className="flex flex-col md:flex-row gap-4">
-            {/* 검색 */}
             <div className="flex-1">
               <div className="relative">
                 <input
@@ -397,7 +392,6 @@ function TransactionsPage() {
               </div>
             </div>
 
-            {/* 정렬 */}
             <div className="md:w-48">
               <select
                 value={sortBy}
@@ -412,7 +406,6 @@ function TransactionsPage() {
             </div>
           </div>
 
-          {/* 검색 결과 카운트 */}
           {(searchKeyword || filterType !== "all") && (
             <div className="mt-3 text-sm text-gray-600">
               {filterType !== "all" &&
@@ -426,69 +419,81 @@ function TransactionsPage() {
         {/* 거래 내역 */}
         <div className="bg-white rounded-lg shadow">
           {filteredTransactions.length > 0 ? (
-            <div className="divide-y">
-              {filteredTransactions.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className="p-6 hover:bg-gray-50 transition"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
+            <>
+              <div className="divide-y">
+                {filteredTransactions.map((transaction) => (
+                  <div
+                    key={transaction.id}
+                    className="p-6 hover:bg-gray-50 transition"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span
+                            className={`px-3 py-1 rounded text-sm font-medium ${
+                              transaction.type === "INCOME"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {transaction.type === "INCOME" ? "수입" : "지출"}
+                          </span>
+                          {transaction.category && (
+                            <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              {transaction.category}
+                            </span>
+                          )}
+                        </div>
+                        {transaction.description && (
+                          <p className="text-gray-600 mb-2">
+                            {transaction.description}
+                          </p>
+                        )}
+                        <div className="text-sm text-gray-500">
+                          {transaction.transactionDate}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
                         <span
-                          className={`px-3 py-1 rounded text-sm font-medium ${
+                          className={`text-2xl font-bold ${
                             transaction.type === "INCOME"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
+                              ? "text-green-600"
+                              : "text-red-600"
                           }`}
                         >
-                          {transaction.type === "INCOME" ? "수입" : "지출"}
+                          {transaction.type === "INCOME" ? "+" : "-"}
+                          {transaction.amount.toLocaleString()}원
                         </span>
-                        {transaction.category && (
-                          <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                            {transaction.category}
-                          </span>
-                        )}
-                      </div>
-                      {transaction.description && (
-                        <p className="text-gray-600 mb-2">
-                          {transaction.description}
-                        </p>
-                      )}
-                      <div className="text-sm text-gray-500">
-                        {transaction.transactionDate}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span
-                        className={`text-2xl font-bold ${
-                          transaction.type === "INCOME"
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
-                      >
-                        {transaction.type === "INCOME" ? "+" : "-"}
-                        {transaction.amount.toLocaleString()}원
-                      </span>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(transaction)}
-                          className="text-blue-600 hover:text-blue-800 px-4 py-2 min-h-[44px]"
-                        >
-                          수정
-                        </button>
-                        <button
-                          onClick={() => handleDelete(transaction.id)}
-                          className="text-red-600 hover:text-red-800 px-4 py-2 min-h-[44px]"
-                        >
-                          삭제
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(transaction)}
+                            className="text-blue-600 hover:text-blue-800 px-4 py-2 min-h-[44px]"
+                          >
+                            수정
+                          </button>
+                          <button
+                            onClick={() => handleDelete(transaction.id)}
+                            className="text-red-600 hover:text-red-800 px-4 py-2 min-h-[44px]"
+                          >
+                            삭제
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+
+              {/* 페이지네이션 */}
+              {!searchKeyword && filterType === "all" && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalElements={totalElements}
+                  onPageChange={handlePageChange}
+                />
+              )}
+            </>
           ) : (
             <div className="p-12 text-center text-gray-500">
               {searchKeyword || filterType !== "all"

@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import Loading from "../components/Loading";
 import ErrorModal from "../components/ErrorModal";
 import Toast from "../components/Toast";
+import Pagination from "../components/Pagination";
 
 function SchedulesPage() {
   const navigate = useNavigate();
@@ -15,6 +16,10 @@ function SchedulesPage() {
   const [filteredSchedules, setFilteredSchedules] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [sortBy, setSortBy] = useState("date-desc");
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [pageSize] = useState(10);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
@@ -36,13 +41,12 @@ function SchedulesPage() {
       return;
     }
     loadSchedules();
-  }, [userId, navigate]);
+  }, [userId, navigate, currentPage, sortBy]);
 
-  // 검색 및 정렬 적용
+  // 클라이언트 사이드 검색 필터링 (페이지네이션된 데이터에 대해)
   useEffect(() => {
     let result = [...schedules];
 
-    // 검색 필터링
     if (searchKeyword.trim()) {
       result = result.filter(
         (schedule) =>
@@ -58,39 +62,32 @@ function SchedulesPage() {
       );
     }
 
-    // 정렬
-    switch (sortBy) {
-      case "date-asc":
-        result.sort(
-          (a, b) => new Date(a.startDatetime) - new Date(b.startDatetime)
-        );
-        break;
-      case "date-desc":
-        result.sort(
-          (a, b) => new Date(b.startDatetime) - new Date(a.startDatetime)
-        );
-        break;
-      case "title-asc":
-        result.sort((a, b) => a.title.localeCompare(b.title));
-        break;
-      case "title-desc":
-        result.sort((a, b) => b.title.localeCompare(a.title));
-        break;
-      default:
-        break;
-    }
-
     setFilteredSchedules(result);
-  }, [schedules, searchKeyword, sortBy]);
+  }, [schedules, searchKeyword]);
 
   const loadSchedules = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await scheduleAPI.getAll(userId);
-      setSchedules(response.data);
-      setFilteredSchedules(response.data);
+      // sortBy에서 정렬 방향과 필드 분리
+      const [field, direction] = sortBy.split("-");
+      const sortField = field === "date" ? "startDatetime" : "title";
+      const sortDirection = direction; // 'asc' or 'desc'
+
+      const response = await scheduleAPI.getAll(
+        userId,
+        currentPage,
+        pageSize,
+        sortField,
+        sortDirection
+      );
+
+      // Spring Boot Page 응답 구조 처리
+      setSchedules(response.data.content);
+      setFilteredSchedules(response.data.content);
+      setTotalPages(response.data.totalPages);
+      setTotalElements(response.data.totalElements);
     } catch (err) {
       console.error("일정 조회 실패:", err);
       setError(
@@ -101,12 +98,17 @@ function SchedulesPage() {
     }
   };
 
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
   const handleSearch = (e) => {
     setSearchKeyword(e.target.value);
   };
 
   const handleSortChange = (e) => {
     setSortBy(e.target.value);
+    setCurrentPage(0); // 정렬 변경 시 첫 페이지로
   };
 
   const handleChange = (e) => {
@@ -121,7 +123,6 @@ function SchedulesPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 날짜 검증
     if (new Date(formData.startDatetime) > new Date(formData.endDatetime)) {
       setToast({
         message: "종료 시간은 시작 시간보다 늦어야 합니다",
@@ -152,6 +153,7 @@ function SchedulesPage() {
       });
       setShowModal(false);
       setEditingSchedule(null);
+      setCurrentPage(0); // 새로 추가/수정 시 첫 페이지로
       await loadSchedules();
     } catch (err) {
       console.error("일정 저장 실패:", err);
@@ -215,7 +217,6 @@ function SchedulesPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Toast 알림 */}
       {toast && (
         <Toast
           message={toast.message}
@@ -224,10 +225,8 @@ function SchedulesPage() {
         />
       )}
 
-      {/* 로딩 모달 */}
       {isLoading && <Loading />}
 
-      {/* 에러 모달 */}
       {error && (
         <ErrorModal
           message={error}
@@ -252,7 +251,6 @@ function SchedulesPage() {
         {/* 검색 & 정렬 섹션 */}
         <div className="bg-white rounded-lg shadow p-4 mb-6">
           <div className="flex flex-col md:flex-row gap-4">
-            {/* 검색 */}
             <div className="flex-1">
               <div className="relative">
                 <input
@@ -278,7 +276,6 @@ function SchedulesPage() {
               </div>
             </div>
 
-            {/* 정렬 */}
             <div className="md:w-48">
               <select
                 value={sortBy}
@@ -293,7 +290,6 @@ function SchedulesPage() {
             </div>
           </div>
 
-          {/* 검색 결과 카운트 */}
           {searchKeyword && (
             <div className="mt-3 text-sm text-gray-600">
               검색 결과: {filteredSchedules.length}개
@@ -305,59 +301,73 @@ function SchedulesPage() {
         {/* 일정 목록 */}
         <div className="bg-white rounded-lg shadow">
           {filteredSchedules.length > 0 ? (
-            <div className="divide-y">
-              {filteredSchedules.map((schedule) => (
-                <div
-                  key={schedule.id}
-                  className="p-6 hover:bg-gray-50 transition"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div
-                          className="w-4 h-4 rounded"
-                          style={{ backgroundColor: schedule.color }}
-                        ></div>
-                        <h3 className="text-xl font-bold text-gray-800">
-                          {schedule.title}
-                        </h3>
-                        {schedule.category && (
-                          <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                            {schedule.category}
-                          </span>
+            <>
+              <div className="divide-y">
+                {filteredSchedules.map((schedule) => (
+                  <div
+                    key={schedule.id}
+                    className="p-6 hover:bg-gray-50 transition"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div
+                            className="w-4 h-4 rounded"
+                            style={{ backgroundColor: schedule.color }}
+                          ></div>
+                          <h3 className="text-xl font-bold text-gray-800">
+                            {schedule.title}
+                          </h3>
+                          {schedule.category && (
+                            <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              {schedule.category}
+                            </span>
+                          )}
+                        </div>
+                        {schedule.description && (
+                          <p className="text-gray-600 mb-2">
+                            {schedule.description}
+                          </p>
                         )}
+                        <div className="text-sm text-gray-500">
+                          {new Date(schedule.startDatetime).toLocaleString(
+                            "ko-KR"
+                          )}
+                          {" ~ "}
+                          {new Date(schedule.endDatetime).toLocaleString(
+                            "ko-KR"
+                          )}
+                        </div>
                       </div>
-                      {schedule.description && (
-                        <p className="text-gray-600 mb-2">
-                          {schedule.description}
-                        </p>
-                      )}
-                      <div className="text-sm text-gray-500">
-                        {new Date(schedule.startDatetime).toLocaleString(
-                          "ko-KR"
-                        )}
-                        {" ~ "}
-                        {new Date(schedule.endDatetime).toLocaleString("ko-KR")}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(schedule)}
+                          className="text-blue-600 hover:text-blue-800 px-4 py-2 min-h-[44px]"
+                        >
+                          수정
+                        </button>
+                        <button
+                          onClick={() => handleDelete(schedule.id)}
+                          className="text-red-600 hover:text-red-800 px-4 py-2 min-h-[44px]"
+                        >
+                          삭제
+                        </button>
                       </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEdit(schedule)}
-                        className="text-blue-600 hover:text-blue-800 px-4 py-2 min-h-[44px]"
-                      >
-                        수정
-                      </button>
-                      <button
-                        onClick={() => handleDelete(schedule.id)}
-                        className="text-red-600 hover:text-red-800 px-4 py-2 min-h-[44px]"
-                      >
-                        삭제
-                      </button>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+
+              {/* 페이지네이션 */}
+              {!searchKeyword && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalElements={totalElements}
+                  onPageChange={handlePageChange}
+                />
+              )}
+            </>
           ) : (
             <div className="p-12 text-center text-gray-500">
               {searchKeyword

@@ -112,12 +112,32 @@ function SchedulesPage() {
   };
 
   const handleChange = (e) => {
-    const value =
-      e.target.type === "checkbox" ? e.target.checked : e.target.value;
-    setFormData({
-      ...formData,
-      [e.target.name]: value,
-    });
+    const { name, value, type, checked } = e.target;
+    const newValue = type === "checkbox" ? checked : value;
+
+    // 종일 체크박스 클릭 시 시간 자동 설정
+    if (name === "isAllDay" && checked) {
+      // 현재 선택된 날짜가 있으면 그 날짜 사용, 없으면 오늘
+      const startDate = formData.startDatetime
+        ? formData.startDatetime.split("T")[0]
+        : new Date().toISOString().split("T")[0];
+
+      const endDate = formData.endDatetime
+        ? formData.endDatetime.split("T")[0]
+        : new Date().toISOString().split("T")[0];
+
+      setFormData({
+        ...formData,
+        isAllDay: true,
+        startDatetime: `${startDate}T00:00`,
+        endDatetime: `${endDate}T23:59`,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: newValue,
+      });
+    }
   };
 
   const handleSubmit = async (e) => {

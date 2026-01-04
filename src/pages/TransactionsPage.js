@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { transactionAPI } from "../services/api";
+import { useAuth } from "../hooks";
 import Header from "../components/Header";
 import Loading from "../components/Loading";
 import ErrorModal from "../components/ErrorModal";
@@ -9,8 +10,7 @@ import Pagination from "../components/Pagination";
 
 function TransactionsPage() {
   const navigate = useNavigate();
-  const userId = localStorage.getItem("userId");
-  const userName = localStorage.getItem("userName");
+  const { userId, checkAuth } = useAuth();
 
   const [transactions, setTransactions] = useState([]);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
@@ -42,12 +42,9 @@ function TransactionsPage() {
   });
 
   useEffect(() => {
-    if (!userId) {
-      navigate("/");
-      return;
-    }
+    if (!checkAuth()) return;
     loadData();
-  }, [userId, navigate, dateRange, currentPage, sortBy]);
+  }, [dateRange, currentPage, sortBy]);
 
   // 클라이언트 사이드 검색 및 타입 필터링
   useEffect(() => {
@@ -268,7 +265,7 @@ function TransactionsPage() {
         />
       )}
 
-      <Header userName={userName} showBackButton={true} />
+      <Header showBackButton={true} />
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">

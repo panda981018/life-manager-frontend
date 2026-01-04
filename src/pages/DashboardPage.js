@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { scheduleAPI, transactionAPI } from "../services/api";
 import { useAuth } from "../hooks";
 import Loading from "../components/Loading";
@@ -6,16 +7,20 @@ import ErrorModal from "../components/ErrorModal";
 import Header from "../components/Header";
 
 function DashboardPage() {
+  const navigate = useNavigate();
   const { userId, checkAuth } = useAuth();
+
   const [schedules, setSchedules] = useState([]);
   const [summary, setSummary] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // checkAuth()로 인증 확인 - 실패하면 자동으로 로그인 페이지로
     if (!checkAuth()) return;
+
     loadData();
-  }, []);
+  }, []); // userId는 useAuth 내부에서 관리되므로 의존성에서 제외
 
   const loadData = async () => {
     setIsLoading(true);
@@ -84,7 +89,7 @@ function DashboardPage() {
         />
       )}
 
-      <Header userName={userName} />
+      <Header />
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         <h2 className="text-3xl font-bold text-gray-800 mb-8">대시보드</h2>
@@ -159,14 +164,14 @@ function DashboardPage() {
             onClick={() => navigate("/schedules")}
             className="bg-blue-500 text-white p-8 rounded-lg hover:bg-blue-600 transition shadow"
           >
-            <h3 className="text-2xl font-bold mb-2">일정 관리 🗓️</h3>
+            <h3 className="text-2xl font-bold mb-2">일정 관리 📅</h3>
             <p className="text-blue-100">일정을 등록하고 관리하세요</p>
           </button>
           <button
             onClick={() => navigate("/transactions")}
             className="bg-green-500 text-white p-8 rounded-lg hover:bg-green-600 transition shadow"
           >
-            <h3 className="text-2xl font-bold mb-2">가계부 관리 📝</h3>
+            <h3 className="text-2xl font-bold mb-2">가계부 관리 💰</h3>
             <p className="text-green-100">수입과 지출을 기록하세요</p>
           </button>
         </div>

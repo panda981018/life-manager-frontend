@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { scheduleAPI } from "../services/api";
+import { useAuth } from "../hooks";
 import Header from "../components/Header";
 import Loading from "../components/Loading";
 import ErrorModal from "../components/ErrorModal";
@@ -9,8 +10,7 @@ import Pagination from "../components/Pagination";
 
 function SchedulesPage() {
   const navigate = useNavigate();
-  const userId = localStorage.getItem("userId");
-  const userName = localStorage.getItem("userName");
+  const { userId, checkAuth } = useAuth();
 
   const [schedules, setSchedules] = useState([]);
   const [filteredSchedules, setFilteredSchedules] = useState([]);
@@ -36,12 +36,9 @@ function SchedulesPage() {
   });
 
   useEffect(() => {
-    if (!userId) {
-      navigate("/");
-      return;
-    }
+    if (!checkAuth()) return;
     loadSchedules();
-  }, [userId, navigate, currentPage, sortBy]);
+  }, [currentPage, sortBy]);
 
   // 클라이언트 사이드 검색 필터링 (페이지네이션된 데이터에 대해)
   useEffect(() => {
@@ -262,7 +259,7 @@ function SchedulesPage() {
         />
       )}
 
-      <Header userName={userName} showBackButton={true} />
+      <Header showBackButton={true} />
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">

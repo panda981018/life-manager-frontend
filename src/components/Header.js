@@ -29,9 +29,12 @@ function Header({ showBackButton = false }) {
     navigate("/dashboard");
   };
 
+  const handleProfileClick = () => {
+    navigate("/profile");
+  };
+
   return (
     <>
-      {/* 로그아웃 확인 모달 */}
       {showLogoutModal && (
         <ConfirmModal
           message="로그아웃 하시겠습니까?"
@@ -58,11 +61,36 @@ function Header({ showBackButton = false }) {
           </div>
 
           <div className="flex items-center gap-2 md:gap-4">
+            {/* 사용자 이름 클릭 시 프로필 페이지로 */}
             {userName && (
-              <span className="hidden md:inline text-gray-600">
+              <button
+                onClick={handleProfileClick}
+                className="hidden md:inline text-gray-600 hover:text-blue-600 transition"
+              >
                 {userName}님
-              </span>
+              </button>
             )}
+
+            {/* 모바일: 프로필 아이콘 */}
+            <button
+              onClick={handleProfileClick}
+              className="md:hidden text-gray-600 hover:text-blue-600 transition p-2"
+              aria-label="프로필"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+            </button>
 
             {showBackButton && (
               <button

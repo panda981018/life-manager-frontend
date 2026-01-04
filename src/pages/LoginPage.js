@@ -54,7 +54,9 @@ function LoginPage() {
       // 대시보드로 이동
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || '오류가 발생했습니다');
+      // 수정된 부분
+      const errorMessage = err.response?.data?.message || '오류가 발생했습니다';
+      setError(errorMessage);
     }
   };
 

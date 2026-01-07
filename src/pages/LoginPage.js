@@ -80,7 +80,7 @@ function LoginPage() {
   // 소셜 로그인
   const handleSocialLogin = (provider) => {
     const backendUrl = process.env.REACT_APP_BACKEND_URL;
-    window.location.href = `${backendUrl}/oauth2/authorization/${provider}`;
+    window.location.href = `${backendUrl}/api/oauth2/authorization/${provider}`;
   };
 
   return (

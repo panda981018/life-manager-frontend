@@ -213,6 +213,17 @@ function LoginPage() {
 
             {/* 소셜 로그인 버튼들 */}
             <div className="mt-6 space-y-3">
+              {/* Google */}
+              <button
+                type="button"
+                onClick={() => handleSocialLogin("google")}
+                className="w-full flex items-center justify-center gap-3 bg-white py-3 rounded-lg hover:bg-gray-50 transition font-medium min-h-[48px] bg-no-repeat bg-center bg-contain"
+                style={{
+                  backgroundImage: "url('/google.png')",
+                }}
+              >
+              </button>
+
               {/* Kakao */}
               <button
                 type="button"

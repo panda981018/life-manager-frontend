@@ -1,6 +1,5 @@
 import axios from "axios";
 
-// 환경 변수에서 API URL 가져오기
 const API_BASE_URL =
   process.env.REACT_APP_API_URL || "https://life-manager.duckdns.org/api";
 
@@ -11,7 +10,6 @@ const api = axios.create({
   },
 });
 
-// 요청 인터셉터 - 토큰 자동 추가
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -25,7 +23,6 @@ api.interceptors.request.use(
   }
 );
 
-// 응답 인터셉터 - 401 에러 시 로그인 페이지로
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -102,18 +99,9 @@ export const transactionAPI = {
 
 // 사용자 API
 export const userAPI = {
-  getUser: (userId) =>
-    api.get(`/users/me`, {
-      headers: { "X-User-Id": userId },
-    }),
-  updateUser: (userId, data) =>
-    api.put(`/users/me`, data, {
-      headers: { "X-User-Id": userId },
-    }),
-  changePassword: (userId, data) =>
-    api.put(`/users/me/password`, data, {
-      headers: { "X-User-Id": userId },
-    }),
+  getUser: () => api.get("/users/me"),
+  updateUser: (data) => api.put("/users/me", data),
+  changePassword: (data) => api.put("/users/me/password", data),
 };
 
 export default api;

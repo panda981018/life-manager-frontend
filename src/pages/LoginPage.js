@@ -77,6 +77,12 @@ function LoginPage() {
     }
   };
 
+  // 소셜 로그인
+  const handleSocialLogin = (provider) => {
+    const backendUrl = process.env.REACT_APP_BACKEND_URL;
+    window.location.href = `${backendUrl}/oauth2/authorization/${provider}`;
+  };
+
   return (
     <div
       style={{ minHeight: "100vh" }}
@@ -189,6 +195,42 @@ function LoginPage() {
             {isLoading ? "처리 중..." : isLogin ? "로그인" : "회원가입"}
           </button>
         </form>
+
+        {/* 소셜 로그인 섹션 */}
+        {isLogin && (
+          <>
+            {/* 구분선 */}
+            <div className="mt-6">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-grey-500">또는</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 소셜 로그인 버튼들 */}
+            <div className="mt-6 space-y-3">
+              {/* Kakao */}
+              <button
+                type="button"
+                onClick={() => handleSocialLogin("kakao")}
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-3 bg-[#FEE500] text-gray-900 py-3 rounded-lg hover:bg-[#FDD835] transition font-medium min-h-[48px] disabled:opacity-50"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path
+                    fill="currentColor"
+                    d="M12 3c5.799 0 10.5 3.664 10.5 8.185 0 4.52-4.701 8.184-10.5 8.184a13.5 13.5 0 0 1-1.727-.11l-4.408 2.883c-.501.265-.678.236-.472-.413l.892-3.678c-2.88-1.46-4.785-3.99-4.785-6.866C1.5 6.665 6.201 3 12 3z"
+                  />
+                </svg>
+                카카오로 계속하기
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

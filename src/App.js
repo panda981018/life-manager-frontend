@@ -12,7 +12,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LoginPage />} />
-        <Route path="/oauth2/redirect" element={<OAuth2RedirectPage />} />
+        <Route path="/api/oauth2/redirect" element={<OAuth2RedirectPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/schedules" element={<SchedulesPage />} />
         <Route path="/transactions" element={<TransactionsPage />} />

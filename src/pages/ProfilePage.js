@@ -29,7 +29,7 @@ function ProfilePage() {
     setIsLoading(true);
     try {
       const response = await userAPI.getUser(userId); // userId 제거
-      setUserInfo(response.data);
+      setUserInfo({email: response.data.email.split('_')[1], name : response.data.name});
       setNameForm({ name: response.data.name });
     } catch (err) {
       console.error("사용자 정보 로드 실패:", err);

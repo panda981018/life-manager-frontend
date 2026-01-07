@@ -228,6 +228,16 @@ function LoginPage() {
                 </svg>
                 카카오로 계속하기
               </button>
+
+              {/* Naver */}
+              <button
+                type="button"
+                onClick={() => handleSocialLogin("naver")}
+                className="w-full flex items-center justify-center gap-3 bg-[#03A94D] text-white py-3 rounded-lg hover:bg-[#02B350] transition font-medium min-h-[48px]"
+              >
+                <img src="/naver-icon.png" alt="Naver" className="w-6 h-6" />
+                네이버로 계속하기
+              </button>
             </div>
           </>
         )}

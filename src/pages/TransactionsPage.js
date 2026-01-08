@@ -292,7 +292,7 @@ function TransactionsPage() {
                   setDateRange({ ...dateRange, startDate: e.target.value });
                   setCurrentPage(0);
                 }}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
+                className="w-full px-2 py-3 border border-gray-300 rounded-lg text-base min-w-0 focus:ring-0 appearance-none [&::-webkit-date-and-time-value]:text-center [&::-webkit-date-and-time-value]:min-h-[1.5em]"
               />
             </div>
             <div className="flex-1">
@@ -306,7 +306,7 @@ function TransactionsPage() {
                   setDateRange({ ...dateRange, endDate: e.target.value });
                   setCurrentPage(0);
                 }}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
+                className="w-full px-2 py-3 border border-gray-300 rounded-lg text-base min-w-0 focus:ring-0 appearance-none [&::-webkit-date-and-time-value]:text-center [&::-webkit-date-and-time-value]:min-h-[1.5em]"
               />
             </div>
           </div>

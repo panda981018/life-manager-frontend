@@ -594,7 +594,7 @@ function TransactionsPage() {
                   name="transactionDate"
                   value={formData.transactionDate}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base min-w-0 focus:ring-0 appearance-none [&::-webkit-date-and-time-value]:text-center [&::-webkit-date-and-time-value]:min-h-[1.5em]"
+                  className="w-full px-2 py-3 border border-gray-300 rounded-lg text-base min-w-0 focus:ring-0 appearance-none [&::-webkit-date-and-time-value]:text-center [&::-webkit-date-and-time-value]:min-h-[1.5em]"
                   required
                 />
               </div>

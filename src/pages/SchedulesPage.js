@@ -464,7 +464,7 @@ function SchedulesPage() {
                   name="startDatetime"
                   value={formData.startDatetime}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base appearance-none [&::-webkit-date-and-time-value]:text-center [&::-webkit-date-and-time-value]:min-h-[1.5em]"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base min-w-0 appearance-none [&::-webkit-date-and-time-value]:text-center [&::-webkit-date-and-time-value]:min-h-[1.5em]"
                   required
                 />
               </div>
@@ -478,7 +478,7 @@ function SchedulesPage() {
                   name="endDatetime"
                   value={formData.endDatetime}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base appearance-none [&::-webkit-date-and-time-value]:text-center [&::-webkit-date-and-time-value]:min-h-[1.5em]"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base min-w-0 appearance-none [&::-webkit-date-and-time-value]:text-center [&::-webkit-date-and-time-value]:min-h-[1.5em]"
                   required
                 />
               </div>

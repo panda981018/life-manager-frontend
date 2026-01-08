@@ -81,12 +81,12 @@ function SchedulesPage() {
 
       // Spring Boot Page 응답 구조 처리
       const content = response.data.content;
-      const totalPagesFromServer = response.data.totalPages;
+      const totalPagesFromServer = response.data.page.totalPages;
 
       setSchedules(content);
       setFilteredSchedules(content);
       setTotalPages(totalPagesFromServer);
-      setTotalElements(response.data.totalElements);
+      setTotalElements(response.data.page.totalElements);
 
       // 현재 페이지가 전체 페이지를 초과하면 마지막 페이지로 이동
       if (totalPagesFromServer > 0 && currentPage >= totalPagesFromServer) {
@@ -464,7 +464,7 @@ function SchedulesPage() {
                   name="startDatetime"
                   value={formData.startDatetime}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base appearance-none [&::-webkit-date-and-time-value]:text-center [&::-webkit-date-and-time-value]:min-h-[1.5em]"
                   required
                 />
               </div>
@@ -478,7 +478,7 @@ function SchedulesPage() {
                   name="endDatetime"
                   value={formData.endDatetime}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base appearance-none [&::-webkit-date-and-time-value]:text-center [&::-webkit-date-and-time-value]:min-h-[1.5em]"
                   required
                 />
               </div>

@@ -98,12 +98,12 @@ function TransactionsPage() {
       ]);
 
       const content = transactionsRes.data.content;
-      const totalPagesFromServer = transactionsRes.data.totalPages;
+      const totalPagesFromServer = transactionsRes.data.page.totalPages;
 
       setTransactions(content);
       setFilteredTransactions(content);
       setTotalPages(totalPagesFromServer);
-      setTotalElements(transactionsRes.data.totalElements);
+      setTotalElements(transactionsRes.data.page.totalElements);
       setSummary(summaryRes.data);
 
       // 현재 페이지가 전체 페이지를 초과하면 마지막 페이지로 이동
@@ -594,7 +594,7 @@ function TransactionsPage() {
                   name="transactionDate"
                   value={formData.transactionDate}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base min-w-0 focus:ring-0 appearance-none [&::-webkit-date-and-time-value]:text-center [&::-webkit-date-and-time-value]:min-h-[1.5em]"
                   required
                 />
               </div>
